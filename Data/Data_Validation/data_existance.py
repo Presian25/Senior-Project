@@ -4,8 +4,8 @@ The goal of this file is to ensure all of the following for an x dataset:
 2) No duplicate rows
 3) No missing values on rows
 
-This script is used for all assets' datasets but crypto,
-as it is a continuous market, while the others are not.
+This script is used for all assets' datasets, however,
+ different method is used for crypto as it is a continuous market.
 
 Substitute the output file path to validate different datasets
 """
@@ -32,23 +32,25 @@ def identify_dataset_type(filename):
 
 #Method to check if all daily data entries exist in the dataset
 def data_completeness(df, filename, type):
-    time_range = pd.date_range(start = df.index.min(), end = df.index.max(), freq = FREQ)
     df = df.sort_index()
+    dates = pd.to_datetime(pd.unique(df.index.date))
+    time_range = pd.date_range(start = dates.min(), end = dates.max(), freq = FREQ)
 
     if type == "_1d":
-        missing = time_range.difference(df.index)
+        missing = time_range.difference(dates)
         if len(missing) > 0:
             print(f"The dataset {filename} has missing {len(missing)} entries")
+            print(f"  e.g. {list(missing[:5])}")
             return False
         print(f"The dataset {filename} has no missing days")
         return True
 
     elif type =="_1h":
-        days = pd.to_datetime(pd.unique(df.index.date))
-        missing = time_range.difference(days)
+        missing = time_range.difference(dates)
 
         if len(missing) > 0:
             print(f"The dataset {filename} has missing {len(missing)} entries")
+            print(f"  e.g. {list(missing[:5])}")
             return False
 
         gaps = {}
@@ -66,6 +68,21 @@ def data_completeness(df, filename, type):
         print("File cannot be classified as hourly/daily")
         return True
 
+#Method to check if all data entries exist in a crypto  dataset
+def data_completeness_crypto(df, filename, type):
+    df = df.sort_index()
+    freq = "h" if type == "_1h" else "D"
+
+    time_range = pd.date_range(start=df.index.min(), end=df.index.max(), freq=freq)
+    missing = time_range.difference(df.index)
+
+    if len(missing) > 0:
+        print(f"The dataset {filename} has missing {len(missing)} entries")
+        return False
+
+    print(f"The dataset {filename} has no missing entries")
+    return True
+
 #Method to ensure no duplicate entries in the datasets
 def ensure_unqiueness(df, filename):
     duplicates = df.index[df.index.duplicated()]
@@ -78,10 +95,7 @@ def ensure_unqiueness(df, filename):
 
 def main():
 
-    csv_files = [
-        csv for csv in sorted(INPUT.rglob("*.csv"))
-        if CONTINUOUS_MARKET not in csv.parts
-    ]
+    csv_files = sorted(INPUT.rglob("*.csv"))
     print(f"Found {len(csv_files)} files to validate.\n")
 
     for file in csv_files:
@@ -93,7 +107,10 @@ def main():
         df = df[df.index.notna()]
         type = identify_dataset_type(filename)
 
-        data_completeness(df, filename, type)
+        if CONTINUOUS_MARKET in file.parts:
+            data_completeness_crypto(df, filename, type)
+        else:
+            data_completeness(df, filename, type)
         ensure_unqiueness(df, filename)
         print()
 
