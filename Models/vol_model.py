@@ -12,20 +12,20 @@ from abc import ABC, abstractmethod
 import numpy as np
 
 
-class VolatilitygModel(ABC):
-    """Abstract base class for any time-series forecasting model."""
-
+class VolatilityModel(ABC):
     def __init__(self):
         self.params = None           #estimated parameters necessary for each model
         self.fitted_values = None    #fitted output by each model
         self.series = None           #Used as memory for the last data the model was fitted on
         self.is_fitted = False       #boolean, needed to know if the model is fit to forecast or not
+        self.fit_start - None
+        self.fit_end = None
 
     #Abstract method, which should be overridden for the unique fitting process of each models parameters
     @abstractmethod
     def fit(self, series):
         raise NotImplementedError
-    #Method to output into a csv the forecasts made at time t for t+1
+    #Method to forecast volatility at time t for t+1
     @abstractmethod
     def forecast(self):
         raise NotImplementedError
