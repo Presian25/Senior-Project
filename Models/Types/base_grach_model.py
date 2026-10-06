@@ -15,17 +15,17 @@ class BaseGARCHModel(VolatilityModel):
 
     #Abstract method, which allows each GARCH-Type model to define its own variance recursion formula
     @abstractmethod
-    def _variance_recursion(self, params, returns):
+    def variance_recursion(self, params, returns):
         raise NotImplementedError
 
     #Abstract method, which allows each GARCH-Type model to define its own starting guess for the optimizer
     @abstractmethod
-    def _initial_params(self, returns):
+    def initial_params(self, returns):
         raise NotImplementedError
 
     #Abstract method, which allows each GARCH-Type model to define its own parameter bounds
     @abstractmethod
-    def _param_bounds(self):
+    def param_bounds(self):
         raise NotImplementedError
 
     #Method to produce a one-step-ahead variance forecast, shared across the family
@@ -34,7 +34,7 @@ class BaseGARCHModel(VolatilityModel):
         raise NotImplementedError
 
     #Method to compute the negative Gaussian log-likelihood over a variance path
-    def _neg_log_likelihood(self, params, returns):
+    def neg_log_likelihood(self, params, returns):
         variance = self._variance_recursion(params, returns)
         if np.any(variance <= 0) or np.any(~np.isfinite(variance)):
             return np.inf
