@@ -35,7 +35,7 @@ class BaseGARCHModel(VolatilityModel):
 
     #Method to compute the negative Gaussian log-likelihood over a variance path
     def neg_log_likelihood(self, params, returns):
-        variance = self._variance_recursion(params, returns)
+        variance = self.variance_recursion(params, returns)
         if np.any(variance <= 0) or np.any(~np.isfinite(variance)):
             return np.inf
         log_likelihood = -0.5 * np.sum(
@@ -47,17 +47,17 @@ class BaseGARCHModel(VolatilityModel):
     def fit(self, series):
         returns = np.asarray(series)
 
-        x0 = self._initial_params(returns)
-        bounds = self._param_bounds()
+        x0 = self.initial_params(returns)
+        bounds = self.param_bounds()
 
         result = minimize(
-            self._neg_log_likelihood, x0, args=(returns,),
+            self.neg_log_likelihood, x0, args=(returns,),
             method="L-BFGS-B", bounds=bounds
         )
 
         self.params = result.x
         self.series = returns
-        self.fitted_values = self._variance_recursion(self.params, returns)
+        self.fitted_values = self.variance_recursion(self.params, returns)
         self.fit_start = 0
         self.fit_end = len(returns) - 1
         self.is_fitted = True
