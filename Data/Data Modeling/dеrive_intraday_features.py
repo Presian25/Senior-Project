@@ -18,7 +18,7 @@ INPUT = Path(__file__).resolve().parent.parent / "Datasets" / "Raw_Datasets"
 OUTPUT = Path(__file__).resolve().parent.parent / "Datasets" / "Derived_Datasets"
 
 HORIZONS_HOURLY = [1, 3, 6, 13, 24, 48, 72, 168]
-
+const_term = np.pi/2
 
 #Method to load a dataset
 def load_dataset(filepath):
@@ -38,7 +38,33 @@ def derive_features_1h(df, horizons):
     for h in horizons:
         out[f"RV_{h}h"] = squared_return.rolling(h).sum().shift(1)
 
+    d_rv_pos, d_rv_neg, d_bv = derive_daily_jump_components(out["log_return"])
+    row_dates = pd.to_datetime(out.index.date, utc=True)
+    out["RV_pos"] = d_rv_pos.reindex(row_dates).values
+    out["RV_neg"] = d_rv_neg.reindex(row_dates).values
+    out["BV"] = d_bv.reindex(row_dates).values
+    
     return out
+
+#Method to compute custom features
+def derive_daily_jump_components(log_return):
+    squared_return = log_return ** 2
+    is_pos = log_return > 0
+
+    d_rv_pos = squared_return.where(is_pos, 0.0).groupby(log_return.index.date).sum()
+    d_rv_neg = squared_return.where(~is_pos, 0.0).groupby(log_return.index.date).sum()
+
+    abs_return = log_return.abs()
+    prod = abs_return * abs_return.shift(1)
+    same_d = log_return.index.date == pd.Series(log_return.index.date, index=log_return.index).shift(1)
+    prod = prod.where(same_d, 0.0)
+    d_bv = (const_term * prod).groupby(log_return.index.date).sum()
+
+    d_rv_pos.index = pd.to_datetime(d_rv_pos.index, utc=True)
+    d_rv_neg.index = pd.to_datetime(d_rv_neg.index, utc=True)
+    d_bv.index = pd.to_datetime(d_bv.index, utc=True)
+
+    return d_rv_pos, d_rv_neg, d_bv
 
 
 def main():

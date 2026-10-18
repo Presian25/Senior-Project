@@ -18,6 +18,7 @@ INPUT = Path(__file__).resolve().parent.parent / "Datasets" / "Raw_Datasets"
 OUTPUT = Path(__file__).resolve().parent.parent / "Datasets" / "Derived_Datasets"
 
 HORIZONS_DAILY = [1, 2, 3, 5, 7, 10, 14, 30]
+const_term = np.pi/2
 
 
 #Method to load a dataset
@@ -37,6 +38,12 @@ def derive_features_1d(df, horizons):
     squared_return = out["log_return"] ** 2
     for h in horizons:
         out[f"RV_{h}d"] = squared_return.rolling(h).sum().shift(1)
+
+    is_pos = out["log_return"] > 0
+    abs_return = out["log_return"].abs()
+    out["RV_pos"] = np.where(is_pos, squared_return, 0.0)
+    out["RV_neg"] = np.where(~is_pos, squared_return, 0.0)
+    out["BV"] = const_term * (abs_return * abs_return.shift(1))
 
     return out
 
