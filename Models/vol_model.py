@@ -18,7 +18,7 @@ class VolatilityModel(ABC):
         self.fitted_values = None    #fitted output by each model
         self.series = None           #Used as memory for the last data the model was fitted on
         self.is_fitted = False       #boolean, needed to know if the model is fit to forecast or not
-        self.fit_start - None
+        self.fit_start = None
         self.fit_end = None
 
     #Abstract method, which should be overridden for the unique fitting process of each models parameters
