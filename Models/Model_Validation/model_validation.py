@@ -19,7 +19,7 @@ ASSETS = [
 ]
 
 WINDOW = 1000
-REFIT = 1000               #count of data entries on which to refit the models
+REFIT = 1               #count of data entries on which to refit the models
 
 #Method to load a required column
 def load_series(features_path, column):
@@ -37,12 +37,13 @@ class ModelValidator:
     """
 
     def __init__(self, name, model, fit_implement,
-                 fit_library=None, true_rv=None,
+                 fit_library=None, forecast_library = None, true_rv=None,
                  window=WINDOW, refit=REFIT):
         self.name = name
         self.model = model
         self.fit_implement = fit_implement
         self.fit_library = fit_library
+        self.forecast_library = forecast_library
         self.true_rv = true_rv
         self.window = window
         self.refit = refit
@@ -84,35 +85,49 @@ class ModelValidator:
         model = None
 
         for t in range(self.window, n - 1):
+            window = values[t - self.window: t]
             if model is None or (t - self.window) % self.refit == 0:
                 model = self.model()
-                model.fit(values[t - self.window: t])
+                model.fit(window)
 
             forecast = model.forecast()
             rv = self.true_rv(values, t)
 
-            rows.append({"model": self.name, "ticker": ticker, "label": label,
-                          "t": idx[t], "forecast": forecast, "actual": rv,
-                          "error": rv - forecast})
+            row = {"model": self.name, "ticker": ticker, "label": label,
+                   "t": idx[t], "forecast": forecast, "actual": rv,
+                   "error": rv - forecast}
+
+            if self.forecast_library is not None:
+                lib_forecast = self.forecast_library(window)
+                row["lib_forecast"] = lib_forecast
+                row["lib_error"] = rv - lib_forecast
+
+            rows.append(row)
 
         df = pd.DataFrame(rows)
         self.save(df, f"{self.name}_{ticker}_forecasts")
 
-        mse = (df["error"] ** 2).mean()
-        mae = df["error"].abs().mean()
-        qlike = self._qlike(df["forecast"], df["actual"])
-        corr = df["forecast"].corr(df["actual"])
+        self.print_metrics(f"{self.name} (yours)", df["forecast"], df["actual"], df["error"])
+        if self.forecast_library is not None:
+            self.print_metrics(f"{self.name} (library)", df["lib_forecast"], df["actual"], df["lib_error"])
 
-        print(f"[{self.name}] {ticker} Metrics: MSE={mse:.8f}  MAE={mae:.8f}  "
-          f"QLIKE={qlike:.6f}  corr={corr:.4f}  n={len(df)}")
         return df
 
-    def _qlike(self, forecast, actual):
+    def qlike(self, forecast, actual):
         valid = (forecast > 0) & (actual > 0)
         f = forecast[valid]
         a = actual[valid]
         ratio = a / f
         return (ratio - np.log(ratio) - 1).mean()
+
+    def print_metrics(self, label, forecast, actual, error):
+        mse = (error ** 2).mean()
+        rmse = np.sqrt(mse)
+        mae = error.abs().mean()
+        qlike_val = self.qlike(forecast, actual)
+        corr = forecast.corr(actual)
+        print(f"[{label}] MSE={mse:.8f}  RMSE={rmse:.8f}  MAE={mae:.8f}  "
+            f"QLIKE={qlike_val:.6f}  corr={corr:.4f}  n={len(forecast)}")
 
     #Internal: save a results dataframe to the shared results directory
     def save(self, df, filename):

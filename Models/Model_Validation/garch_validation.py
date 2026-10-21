@@ -11,8 +11,14 @@ def fit_implemented_fn(window):
 def fit_library_fn(window):
     am = arch_model(window, mean="Zero", vol="Garch", p=1, q=1, dist="normal", rescale=False)
     r = am.fit(disp="off")
-    return {"omega": r.params["omega"], "alpha": r.params["alpha[1]"], "beta": r.params["beta[1]"]}, r.loglikelihood
+    return {"omega": r.params["omega"], "alpha": r.params["alpha[1]"],
+             "beta": r.params["beta[1]"]}, r.loglikelihood
 
+def forecast_library(window):
+    lib_model = arch_model(window, mean="Zero", vol="GARCH", p=1, q=1, dist="normal", rescale=False)
+    r = lib_model.fit(disp="off")
+    f = r.forecast(horizon=1, reindex=False)
+    return f.variance.values[-1, 0]
 def get_rv(values, t):
     return values[t + 1] ** 2
 
@@ -21,6 +27,7 @@ validator = ModelValidator(
     model=GARCH_1_1,
     fit_implement=fit_implemented_fn,
     fit_library=fit_library_fn,
+    forecast_library = forecast_library,
     true_rv = get_rv,
 )
 
