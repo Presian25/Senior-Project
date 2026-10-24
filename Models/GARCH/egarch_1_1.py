@@ -12,7 +12,7 @@ import csv
 from pathlib import Path
 
 from Models.GARCH.base_garch_model import BaseGARCHModel
-
+VAR_TH = 20.0
 
 class EGARCH_1_1(BaseGARCHModel):
 
@@ -21,14 +21,15 @@ class EGARCH_1_1(BaseGARCHModel):
         o, a, b, g = params           #omega, alpha, beta
         period = len(returns)
         log_var = np.zeros(period)
-        log_var[0] = np.log(np.var(returns))
+        log_var[0] = np.clip(np.log(np.var(returns)), -VAR_TH, VAR_TH)
 
         const_term = np.sqrt(2/np.pi)
 
         for t in range(1, period):
             prev_std = np.sqrt(np.exp(log_var[t-1]))
             stand_returns = returns[t-1]/prev_std
-            log_var[t] = (o + b*log_var[t-1] + a*(np.abs(stand_returns) - const_term) + g * stand_returns)
+            temp_log_var = (o + b*log_var[t-1] + a*(np.abs(stand_returns) - const_term) + g * stand_returns)
+            log_var[t] = np.clip(temp_log_var, -VAR_TH, VAR_TH)
         return np.exp(log_var)
 
     #Method to set a the starting guess for the parameters
@@ -42,7 +43,7 @@ class EGARCH_1_1(BaseGARCHModel):
 
     #Method to set parameter limits
     def param_bounds(self):
-        return [(None, None), (None, None), (-0.999, 0.999), (None, None),]
+        return [(-5.0, 5.0), (-5.0, 5.0), (-0.999, 0.999), (-5.0, 5.0),]
 
     #Method to produce a variance forecast at time t for time t+1
     def forecast(self):
@@ -55,6 +56,7 @@ class EGARCH_1_1(BaseGARCHModel):
         const_term = np.sqrt(2/np.pi)
 
         forecast = (o + b* np.log(prev_variance) + a*(np.abs(stand) - const_term) + g * stand)
+        forecast = np.clip(forecast, -VAR_TH, VAR_TH)
         return np.exp(forecast)
 
     #Method to save fit data

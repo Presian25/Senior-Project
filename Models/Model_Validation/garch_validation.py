@@ -2,6 +2,8 @@ from Models.GARCH.garch_1_1 import GARCH_1_1
 from arch import arch_model
 from Models.Model_Validation.model_validation import ModelValidator, load_series, ASSETS
 
+
+
 def fit_implemented_fn(window):
     m = GARCH_1_1()
     m.fit(window)
@@ -10,15 +12,16 @@ def fit_implemented_fn(window):
 
 def fit_library_fn(window):
     am = arch_model(window, mean="Zero", vol="Garch", p=1, q=1, dist="normal", rescale=False)
-    r = am.fit(disp="off")
+    r = am.fit(disp="off", options={'maxiter': 500}, show_warning=False)
     return {"omega": r.params["omega"], "alpha": r.params["alpha[1]"],
              "beta": r.params["beta[1]"]}, r.loglikelihood
 
 def forecast_library(window):
     lib_model = arch_model(window, mean="Zero", vol="GARCH", p=1, q=1, dist="normal", rescale=False)
-    r = lib_model.fit(disp="off")
+    r = lib_model.fit(disp="off", options={'maxiter': 500}, show_warning=False)
     f = r.forecast(horizon=1, reindex=False)
     return f.variance.values[-1, 0]
+
 def get_rv(values, t):
     return values[t + 1] ** 2
 

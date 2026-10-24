@@ -52,7 +52,8 @@ class BaseGARCHModel(VolatilityModel):
 
         result = minimize(
             self.neg_log_likelihood, x0, args=(returns,),
-            method="L-BFGS-B", bounds=bounds
+            method="L-BFGS-B", bounds=bounds,
+            options = {'maxiter': 500}
         )
 
         self.params = result.x

@@ -14,8 +14,10 @@ DERIVED_DIR = ROOT / "Data" / "Datasets" / "Derived_Datasets"
 RESULTS_DIR = ROOT / "Data" / "Datasets" / "Model_Validation_Datasets"
 
 ASSETS = [
-    ("SPY", DERIVED_DIR / "ETFs" / "SPY_features_1h.csv", "low_vol"),
-    ("BTCUSDT", DERIVED_DIR / "Crypto" / "BTCUSDT_features_1h.csv", "high_vol"),
+    ("SPY", DERIVED_DIR / "ETFs" / "SPY_features_1h.csv", "low_vol_1h"),
+    ("BTCUSDT", DERIVED_DIR / "Crypto" / "BTCUSDT_features_1h.csv", "high_vol_1h"),
+    ("SPY", DERIVED_DIR / "ETFs" / "SPY_features_1d.csv", "low_vol_1d"),
+    ("BTCUSDT", DERIVED_DIR / "Crypto" / "BTCUSDT_features_1d.csv", "high_vol_1d"),
 ]
 
 WINDOW = 1000
@@ -83,8 +85,9 @@ class ModelValidator:
         n = len(values)
         rows = []
         model = None
+        steps = n - 1 - self.window
 
-        for t in range(self.window, n - 1):
+        for i, t in enumerate(range(self.window, n - 1)):
             window = values[t - self.window: t]
             if model is None or (t - self.window) % self.refit == 0:
                 model = self.model()
@@ -103,6 +106,10 @@ class ModelValidator:
                 row["lib_error"] = rv - lib_forecast
 
             rows.append(row)
+
+            if (i + 1) % 200 == 0 or (i + 1) == steps:
+                pct = 100 * (i + 1) / steps
+                print(f"  [{self.name}] {ticker} {label}: step {i+1}/{steps} ({pct:.1f}%)")
 
         df = pd.DataFrame(rows)
         self.save(df, f"{self.name}_{ticker}_forecasts")
