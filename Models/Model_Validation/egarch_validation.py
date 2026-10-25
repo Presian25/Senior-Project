@@ -2,13 +2,9 @@ from Models.GARCH.egarch_1_1 import EGARCH_1_1
 from arch import arch_model
 from Models.Model_Validation.model_validation import ModelValidator, load_series, ASSETS
 
-import warnings
-
 
 def fit_implemented_fn(window):
     m = EGARCH_1_1()
-    #with warnings.catch_warnings():
-        #warnings.simplefilter("ignore", RuntimeWarning)
     m.fit(window)
 
     loglik = -m.neg_log_likelihood(m.params, window)
