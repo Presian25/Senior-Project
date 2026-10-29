@@ -21,7 +21,7 @@ ASSETS = [
 ]
 
 WINDOW = 1000
-REFIT = 1               #count of data entries on which to refit the models
+REFIT = 10               #count of data entries on which to refit the models
 
 #Method to load a required column
 def load_series(features_path, column):
