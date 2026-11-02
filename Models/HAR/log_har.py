@@ -35,8 +35,8 @@ class LogHAR(BaseHARModel):
         reg = np.column_stack(cols)
         target = log_rv.values
 
-        valid = ~np.isnan(reg).any(axis=1) & ~np.isnan(target)
-        valid &= np.isfinite(reg).all(axis=1)
+        valid = np.isfinite(reg).all(axis=1) & np.isfinite(target)
+        self._floor = rv[rv > 0].min()
 
         rm = reg[valid]
         y = target[valid]
@@ -50,7 +50,7 @@ class LogHAR(BaseHARModel):
         rv = df[self.rv_col]
         reg_vals = [1.0]
         for w in self.windows:
-            rol_mean = rv.iloc[-w:].mean()
+            rol_mean = max(rv.iloc[-w:].mean(), self._floor)
             reg_vals.append(np.log(rol_mean))
 
         log_forecast =  float(np.dot(self.params, reg_vals))
