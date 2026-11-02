@@ -1,12 +1,15 @@
 """
 The purpose of the script is to derive the following input features from intraday data:
 1) log_return = log(close).diff() - used by GARCH-type and ARIMA-type models
-2) RV_Xh = rolling sum of squared log_return over the trailing - used by HAR-type models
-                X hours, shifted by 1 bar to avoid lookahead
+2) RV_Xh = rolling sum of squared log_return over the trailing X hours,
+           shifted by 1 bar to avoid lookahead - used by HAR-type models
+3) RV_pos, RV_neg, BV = signed semivariances and bipower variation, computed per
+           calendar day and broadcast to the rows of the FOLLOWING trading day, so that
+           a row never contains information from hours after its own timestamp
 
-Horizons: 1h, 3h, 6h, 13h, 24h.
+Horizons: 1h, 3h, 6h, 13h, 24h, 48h, 72h, 168h.
 
-Reads every *_1h.csv under Datasets/Raw_Datasets and writes a corrseponding
+Reads every *_1h.csv under Datasets/Raw_Datasets and writes a corresponding
 *_features_1h.csv per ticker.
 """
 
@@ -18,7 +21,8 @@ INPUT = Path(__file__).resolve().parent.parent / "Datasets" / "Raw_Datasets"
 OUTPUT = Path(__file__).resolve().parent.parent / "Datasets" / "Derived_Datasets"
 
 HORIZONS_HOURLY = [1, 3, 6, 13, 24, 48, 72, 168]
-const_term = np.pi/2
+const_term = np.pi / 2
+
 
 #Method to load a dataset
 def load_dataset(filepath):
@@ -40,13 +44,17 @@ def derive_features_1h(df, horizons):
 
     d_rv_pos, d_rv_neg, d_bv = derive_daily_jump_components(out["log_return"])
     row_dates = pd.to_datetime(out.index.date, utc=True)
-    out["RV_pos"] = d_rv_pos.reindex(row_dates).values
-    out["RV_neg"] = d_rv_neg.reindex(row_dates).values
-    out["BV"] = d_bv.reindex(row_dates).values
-    
+
+    # The daily totals of day d include hours after any given row of day d, so each row
+    # uses the PREVIOUS trading day's totals (shift on the daily index, then broadcast).
+    out["RV_pos"] = d_rv_pos.shift(1).reindex(row_dates).values
+    out["RV_neg"] = d_rv_neg.shift(1).reindex(row_dates).values
+    out["BV"] = d_bv.shift(1).reindex(row_dates).values
+
     return out
 
-#Method to compute custom features
+
+#Method to compute the daily jump-related components
 def derive_daily_jump_components(log_return):
     squared_return = log_return ** 2
     is_pos = log_return > 0

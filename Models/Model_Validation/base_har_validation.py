@@ -14,8 +14,8 @@ WINDOWS = (1, 5, 22)     #rv horizons
 COLS = {
     "rv": {"low_vol_1h": "RV_1h", "high_vol_1h": "RV_1h",
            "low_vol_1d": "RV_1d", "high_vol_1d": "RV_1d"},
-    "bv": {"low_vol_1h": "BV_1h", "high_vol_1h": "BV_1h",
-           "low_vol_1d": "BV_1d", "high_vol_1d": "BV_1d"},
+    "bv": {"low_vol_1h": "BV", "high_vol_1h": "BV",
+           "low_vol_1d": "BV", "high_vol_1d": "BV"},
 }
 
 
