@@ -1,0 +1,67 @@
+{
+ "ABS_SCALE": 0.7978845608028654,
+ "FREQS": null,
+ "ASSETS": null,
+ "WINDOW": {
+  "1h": 24,
+  "1d": 22
+ },
+ "FLOOR_FRACTION": 0.1,
+ "ROLLING": 500,
+ "Y_FLOOR": 1e-06,
+ "VAR_FLOOR": 1e-08,
+ "MIN_GROUP": 30,
+ "MODEL_NAMES": [
+  "GARCH_1_1",
+  "GJR_GARCH_1_1",
+  "EGARCH_1_1",
+  "ARIMA",
+  "SARIMA",
+  "ARFIMA",
+  "HAR",
+  "LogHAR",
+  "HAR_CJ",
+  "SemiVarHAR"
+ ],
+ "REFS": [
+  "NAIVE",
+  "ENS_MEAN",
+  "ENS_MEDIAN"
+ ],
+ "S_QUANTILE": {
+  "1h": 0.98,
+  "1d": 0.95
+ },
+ "S_HISTORY": 500,
+ "MIN_HISTORY": 60,
+ "DECAY_WINDOW": {
+  "1h": 12,
+  "1d": 5
+ },
+ "BASE_WINDOW": {
+  "1h": 24,
+  "1d": 10
+ },
+ "PERSIST_MARGIN": 1.2,
+ "CATCH_UP": 0.5,
+ "CALM_TOLERANCE": 0.1,
+ "PATH_BEFORE": 3,
+ "MIN_EVENTS": 5,
+ "SAVE_LOG": true,
+ "SAVE_PERIODS": true,
+ "HIST_RANGE": [
+  -3,
+  3
+ ],
+ "HIST_BINS": 60,
+ "CALIB_BINS": 10,
+ "ROLL_WINDOW": {
+  "1h": 500,
+  "1d": 60
+ },
+ "ROLL_STEP": {
+  "1h": 24,
+  "1d": 5
+ },
+ "run_time": "2026-11-14T15:11:42"
+}
