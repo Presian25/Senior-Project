@@ -102,6 +102,16 @@ class SARIMA(BaseARIMAModel):
 
         forecast_val = c + ar + sar + ma + sma
         return self.invert_conversion(self.series, forecast_val)
+
+    
+    #Method to add a penalty that keeps the AR and MA parts stable (|phi|+|Phi| < 1, |theta|+|Theta| < 1)
+    def neg_log_likelihood(self, params, series):
+        c, phi, Phi, theta, Theta = self.set_params(params)
+        ar_sum = sum(abs(x) for x in phi) + sum(abs(x) for x in Phi)
+        ma_sum = sum(abs(x) for x in theta) + sum(abs(x) for x in Theta)
+        penalty = max(0.0, ar_sum - 0.98) ** 2 + max(0.0, ma_sum - 0.98) ** 2
+        return super().neg_log_likelihood(params, series) + 1e6 * penalty
+
     #Method to set param bounds within (-1, 1)
     def param_bounds(self):
         bounds = [(None, None)]

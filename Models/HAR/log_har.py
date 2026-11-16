@@ -53,8 +53,9 @@ class LogHAR(BaseHARModel):
             rol_mean = max(rv.iloc[-w:].mean(), self._floor)
             reg_vals.append(np.log(rol_mean))
 
-        log_forecast =  float(np.dot(self.params, reg_vals))
-        return np.exp(log_forecast)
+        log_forecast = float(np.dot(self.params, reg_vals))
+        smear = float(np.mean(np.exp(self.series - self.fitted_values)))
+        return np.exp(log_forecast) * smear
 
     #Method to collect fit data
     def fit_validation(self, log_path=None, ticker=None):

@@ -43,7 +43,7 @@ class EGARCH_1_1(BaseGARCHModel):
 
     #Method to set parameter limits
     def param_bounds(self):
-        return [(-5.0, 5.0), (-5.0, 5.0), (-0.999, 0.999), (-5.0, 5.0),]
+        return [(-5.0, 5.0), (0.0, 5.0), (-0.999, 0.999), (-5.0, 5.0),]
 
     #Method to produce a variance forecast at time t for time t+1
     def forecast(self):
