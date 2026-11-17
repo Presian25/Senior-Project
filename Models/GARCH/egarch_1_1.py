@@ -13,6 +13,7 @@ from pathlib import Path
 
 from Models.GARCH.base_garch_model import BaseGARCHModel
 VAR_TH = 20.0
+Z_CAP = 5.0 
 
 class EGARCH_1_1(BaseGARCHModel):
 
@@ -27,7 +28,7 @@ class EGARCH_1_1(BaseGARCHModel):
 
         for t in range(1, period):
             prev_std = np.sqrt(np.exp(log_var[t-1]))
-            stand_returns = returns[t-1]/prev_std
+            stand_returns = np.clip(returns[t-1]/prev_std, -Z_CAP, Z_CAP)
             temp_log_var = (o + b*log_var[t-1] + a*(np.abs(stand_returns) - const_term) + g * stand_returns)
             log_var[t] = np.clip(temp_log_var, -VAR_TH, VAR_TH)
         return np.exp(log_var)
@@ -52,7 +53,7 @@ class EGARCH_1_1(BaseGARCHModel):
         prev_return = self.series[-1]
         prev_variance = self.fitted_values[-1]
         prev_std = np.sqrt(prev_variance)
-        stand = prev_return / prev_std
+        stand = np.clip(prev_return / prev_std, -Z_CAP, Z_CAP)
         const_term = np.sqrt(2/np.pi)
 
         forecast = (o + b* np.log(prev_variance) + a*(np.abs(stand) - const_term) + g * stand)
