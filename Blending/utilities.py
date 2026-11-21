@@ -43,12 +43,12 @@ def prep(item):
     freq = item["freq"]
     returns = load(item["path"])["log_return"]
     naive = np.sqrt((returns ** 2).rolling(NAIVE_WINDOW[freq]).mean().shift(1)) * 100
-    y = (returns.abs() * 100).reindex(S.index)
-    S = S[y.notna()]
+    y = (returns.abs() * 100).reindex(set.index)
+    set = set[y.notna()]
     y = y[y.notna()]
-    naive = naive.reindex(S.index)
-    S = S.clip(lower=FLOOR_FRACTION * naive.median())    
-    return S, y, naive
+    naive = naive.reindex(set.index)
+    set = set.clip(lower=FLOOR_FRACTION * naive.median())    
+    return set, y, naive
 
 
 #Method to save forecasts
