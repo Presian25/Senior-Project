@@ -15,7 +15,7 @@ REG_W = 0.5
 
 
 #Method to CLASSIFY REGIMES
-def regime_labels(naive, freq):
+def reg_labels(naive, freq):
     q = PREV[freq]
     l = naive.rolling(q, min_periods=q // 2).quantile(1 / 3).shift(1)
     h = naive.rolling(q, min_periods=q // 2).quantile(2 / 3).shift(1)
@@ -29,7 +29,7 @@ def reg_ws(set, y, naive, freq):
     p = PERIODS[freq]
     vars = set.to_numpy() ** 2
     act_sq = np.maximum(y.to_numpy() ** 2, VAR_FLOOR)
-    labels = regime_labels(naive, freq)
+    labels = reg_labels(naive, freq)
     eq = np.full(set.shape[1], 1 / set.shape[1])
 
     result = np.full(len(set), np.nan)
