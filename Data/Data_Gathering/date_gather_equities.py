@@ -1,6 +1,5 @@
 """
-Downloads equity data for 5 large-cap stocks, from diverse sectors, from Yahoo Finance.
-Data span: 2 years hourly + full 5 years daily.
+This file downloads equity data for 5 large-cap stocks, from diverse sectors, from Yahoo Finance.
 """
 import time
 

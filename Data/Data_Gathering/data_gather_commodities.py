@@ -1,6 +1,5 @@
 """
-Downloads commodity futures data for 5 diversified contracts from Yahoo Finance.
-Data span: 2 years hourly + full 5 years daily.
+The script downloads commodity futures data for 5 diversified contracts from Yahoo Finance.
 The observed assets are precious metals, energy and industrial metals so the sample is diverse.
 """
 import time

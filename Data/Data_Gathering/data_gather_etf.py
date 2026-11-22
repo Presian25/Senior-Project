@@ -1,6 +1,5 @@
 """
 Downloads ETF data for 5 diversified funds from Yahoo Finance. 
-Data span: 2 years hourly + full 5 years daily.
 The assets observed are broad equity index, a tech index, a commodity, a bond
 fund and an emerging-markets fund.
 """

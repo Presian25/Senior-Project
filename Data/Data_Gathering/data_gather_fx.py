@@ -1,6 +1,5 @@
 """
-Downloads FX data for 5 major currency pairs from Yahoo Finance. 
-Data span: 2 years hourly + full 5 years daily. 
+This file downloads FX data for 5 currency pairs from Yahoo Finance. 
 The pairs chosen are across USD, EUR, GBP, JPY, CHF and AUD exposure.
 """
 import time

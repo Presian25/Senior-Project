@@ -1,16 +1,16 @@
 """
-The purpose of the script is to derive the following input features from intraday data:
-1) log_return = log(close).diff() - used by GARCH-type and ARIMA-type models
-2) RV_Xh = rolling sum of squared log_return over the trailing X hours,
-           shifted by 1 bar to avoid lookahead - used by HAR-type models
-3) RV_pos, RV_neg, BV = signed semivariances and bipower variation, computed per
-           calendar day and broadcast to the rows of the FOLLOWING trading day, so that
-           a row never contains information from hours after its own timestamp
+The purpose of the script is to derive the intraday (or hourly) features.
+The file follows similar logic to the derive_daily_features file, so check its docstring as well.
 
-Horizons: 1h, 3h, 6h, 13h, 24h, 48h, 72h, 168h.
+A difference is the new method - derive_daily_jump_components. 
+Every row of the daily file is one day, so shifting by one row is enough to avoid information leaking for time t.
+Here a row is one hour, so RV_pos, RV_neg and BV are first added up per UTC calendar day,
+then shifted by one day, and every hourly row gets the totals of the previous day.
+This way a row never sees later hours of its own day.
+For BV, a product of two consecutive returns is only counted when both are from the same day.
 
-Reads every *_1h.csv under Datasets/Raw_Datasets and writes a corresponding
-*_features_1h.csv per ticker.
+The previous methodology of simply shifting by 1 row cannot work here, as the shift could result in still
+a timestamp of the current day if it is for example 13:00
 """
 
 import numpy as np
@@ -21,7 +21,7 @@ INPUT = Path(__file__).resolve().parent.parent / "Datasets" / "Raw_Datasets"
 OUTPUT = Path(__file__).resolve().parent.parent / "Datasets" / "Derived_Datasets"
 
 HORIZONS_HOURLY = [1, 3, 6, 13, 24, 48, 72, 168]
-const_term = np.pi / 2
+CONST_TERM = np.pi / 2
 
 
 #Method to load a dataset
@@ -32,21 +32,19 @@ def load_dataset(filepath):
     return df.sort_index()
 
 
-#Method to derive the features
+#Method to derive the intraday features
 def derive_features_1h(df, horizons):
     out = pd.DataFrame(index=df.index)
     out["close"] = df["close"]
     out["log_return"] = np.log(df["close"]).diff()
 
-    squared_return = out["log_return"] ** 2
+    sq_return = out["log_return"] ** 2
     for h in horizons:
-        out[f"RV_{h}h"] = squared_return.rolling(h).sum().shift(1)
+        out[f"RV_{h}h"] = sq_return.rolling(h).sum().shift(1)
 
     d_rv_pos, d_rv_neg, d_bv = derive_daily_jump_components(out["log_return"])
     row_dates = pd.to_datetime(out.index.date, utc=True)
 
-    # The daily totals of day d include hours after any given row of day d, so each row
-    # uses the PREVIOUS trading day's totals (shift on the daily index, then broadcast).
     out["RV_pos"] = d_rv_pos.shift(1).reindex(row_dates).values
     out["RV_neg"] = d_rv_neg.shift(1).reindex(row_dates).values
     out["BV"] = d_bv.shift(1).reindex(row_dates).values
@@ -54,19 +52,19 @@ def derive_features_1h(df, horizons):
     return out
 
 
-#Method to compute the daily jump-related components
+#Method to compute the daily jump-related components (check the main docstring for more info)
 def derive_daily_jump_components(log_return):
-    squared_return = log_return ** 2
+    sq_return = log_return ** 2
     is_pos = log_return > 0
 
-    d_rv_pos = squared_return.where(is_pos, 0.0).groupby(log_return.index.date).sum()
-    d_rv_neg = squared_return.where(~is_pos, 0.0).groupby(log_return.index.date).sum()
+    d_rv_pos = sq_return.where(is_pos, 0.0).groupby(log_return.index.date).sum()
+    d_rv_neg = sq_return.where(~is_pos, 0.0).groupby(log_return.index.date).sum()
 
     abs_return = log_return.abs()
     prod = abs_return * abs_return.shift(1)
     same_d = log_return.index.date == pd.Series(log_return.index.date, index=log_return.index).shift(1)
     prod = prod.where(same_d, 0.0)
-    d_bv = (const_term * prod).groupby(log_return.index.date).sum()
+    d_bv = (CONST_TERM * prod).groupby(log_return.index.date).sum()
 
     d_rv_pos.index = pd.to_datetime(d_rv_pos.index, utc=True)
     d_rv_neg.index = pd.to_datetime(d_rv_neg.index, utc=True)

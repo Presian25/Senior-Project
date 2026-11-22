@@ -76,6 +76,10 @@ def validation_returns(df, filename, threshold = MAX_DELTA):
 def validation_price_volume(df, filename):
     if "volume" not in df.columns or "open" not in df.columns or "close" not in df.columns:
         return True
+    #FXs have no volume, so prevent false warnings
+    if df["volume"].sum() == 0:
+        print(f"The dataset {filename} has no volume data, check skipped")
+        return True
 
     fault = (df["volume"] == 0) & (df["open"] != df["close"])
     if fault.any(): 
@@ -90,6 +94,7 @@ def main():
     csv_files = sorted(INPUT.rglob("*.csv"))
     print(f"Found {len(csv_files)} files to validate.\n")
 
+    results = {}
     for file in csv_files:
         filename = file.name
         print(f"--- {filename} ---")
@@ -98,12 +103,15 @@ def main():
         df.index = pd.to_datetime(df.index, utc=True, errors="coerce")
         df = df[df.index.notna()]
 
-        validation_prices(df, filename)
-        validation_volume(df, filename)
-        validation_range(df, filename)
-        validation_returns(df, filename)
-        validation_price_volume(df, filename)
+        results[filename] = {
+            "prices": validation_prices(df, filename),
+            "volume": validation_volume(df, filename),
+            "range": validation_range(df, filename),
+            "returns": validation_returns(df, filename),
+            "price_volume": validation_price_volume(df, filename),
+    }
         print()
+    return results
 
 
 if __name__ == "__main__":

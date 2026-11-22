@@ -2,19 +2,16 @@
 The goal of this file is to ensure all of the following for an x dataset:
 1) All timestamps from the start to the last exist
 2) No duplicate rows
-3) No missing values on rows
 
 This script is used for all assets' datasets, however,
  different method is used for crypto as it is a continuous market.
 
-Substitute the output file path to validate different datasets
+Usage note: Substitute the output file path to validate different datasets
 """
 
 import pandas as pd
 from pathlib import Path
 
-DAYS = 729
-YEARS = 2
 TYPES = ["_1h", "_1d"]
 FREQ = "B"
 INPUT = Path(__file__).resolve().parent.parent / "Datasets" / "Raw_Datasets" 
@@ -22,10 +19,10 @@ CONTINUOUS_MARKET = "Crypto"
 
 #Method to identify whether the analyzed dataset is on hourly or on daily data
 def identify_dataset_type(filename):
-    for type in TYPES: 
-        if type in filename:
-            print(f"Dataset type: {type}")
-            return type
+    for freq in TYPES: 
+        if freq in filename:
+            print(f"Dataset type: {freq}")
+            return freq
     return None
 
 
@@ -94,10 +91,10 @@ def ensure_unqiueness(df, filename):
 
 
 def main():
-
     csv_files = sorted(INPUT.rglob("*.csv"))
     print(f"Found {len(csv_files)} files to validate.\n")
 
+    results = {}
     for file in csv_files:
         filename = file.name
         print(f"--- {filename} ---")
@@ -108,11 +105,15 @@ def main():
         type = identify_dataset_type(filename)
 
         if CONTINUOUS_MARKET in file.parts:
-            data_completeness_crypto(df, filename, type)
+            complete = data_completeness_crypto(df, filename, type)
         else:
-            data_completeness(df, filename, type)
-        ensure_unqiueness(df, filename)
+            complete = data_completeness(df, filename, type)
+        unique = ensure_unqiueness(df, filename)
+
+        results[filename] = {"complete": complete, "unique": unique}
         print()
+
+    return results
 
 
 if __name__ == "__main__":

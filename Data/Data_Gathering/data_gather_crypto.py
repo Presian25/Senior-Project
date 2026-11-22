@@ -1,20 +1,19 @@
 """
-Downloads OHLCV data for major cryptocurrencies from Binance's public
-REST API. Outputs datasets in Data/Datasets/Raw_Datasets/crypto
+This file downloads OHLCV data for major cryptocurrencies from Binance's public
+REST API.
 """
-import os
-import time
-from datetime import datetime, timedelta, timezone
 
+import time
 import numpy as np
 import pandas as pd
 import requests
 
 from pathlib import Path
+from datetime import datetime, timedelta, timezone
 
 
-YEARS = 5         #Num of years to load daily data
-DAYS = 729        #Num of days to load daily data
+YEARS = 5
+DAYS = 729
 SYMBOLS = ["BTCUSDT", "ETHUSDT", "BNBUSDT", "SOLUSDT", "XRPUSDT"]
 OUTPUT_DIR = Path(__file__).resolve().parent.parent / "Datasets" / "Raw_Datasets" / "Crypto"
 BASE_URL = "https://api.binance.com/api/v3/klines"
@@ -49,7 +48,7 @@ def fetch_symbol(symbol, interval, start_ms, end_ms):
     return rows
 
 #Method to convert from list of lists to pd Data frame
-def convert(rows):
+def convert_to_df(rows):
     df = pd.DataFrame(rows, columns=FEATURES)
     df["open_time"] = pd.to_datetime(df["open_time"], unit="ms", utc=True)
     for col in ["open", "high", "low", "close", "volume"]:
@@ -60,32 +59,31 @@ def convert(rows):
 
 
 def main():
-    os.makedirs(OUTPUT_DIR, exist_ok=True)
+    OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
 
-    #Set tie constraints on the data gathering window
-    now = datetime.now(timezone.utc)
-    end_ms = int(now.timestamp() * 1000)
-    d_start_ms = int((now - timedelta(days=365 * YEARS)).timestamp() * 1000)
-    h_start_ms = int((now - timedelta(days=DAYS)).timestamp() * 1000)
+    curr = datetime.now(timezone.utc)
+    end_ms = int(curr.timestamp() * 1000)
+    daily_start_ms = int((curr - timedelta(days=365 * YEARS)).timestamp() * 1000)
+    hourly_start_ms = int((curr - timedelta(days=DAYS)).timestamp() * 1000)
 
     for symbol in SYMBOLS:
         print(f"Started etching {symbol}")
 
         #Fetching daily data
         print("Daily data:")
-        d_rows = fetch_symbol(symbol, "1d", d_start_ms, end_ms)
+        d_rows = fetch_symbol(symbol, "1d", daily_start_ms, end_ms)
         if d_rows:
-            df_d = convert(d_rows)
-            path = os.path.join(OUTPUT_DIR, f"{symbol}_1d.csv")
+            df_d = convert_to_df(d_rows)
+            path = OUTPUT_DIR / f"{symbol}_1d.csv"
             df_d.to_csv(path, index=False)
             print(f"Successfully saved at {path}")
 
         #Fetching hourly data
         print("Hourly data:")
-        h_rows = fetch_symbol(symbol, "1h", h_start_ms, end_ms)
+        h_rows = fetch_symbol(symbol, "1h", hourly_start_ms, end_ms)
         if h_rows:
-            df_h = convert(h_rows)
-            path = os.path.join(OUTPUT_DIR, f"{symbol}_1h.csv")
+            df_h = convert_to_df(h_rows)
+            path = OUTPUT_DIR / f"{symbol}_1h.csv"
             df_h.to_csv(path, index=False)
             print(f"Successfully saved at {path}")
 
