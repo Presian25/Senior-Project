@@ -16,7 +16,6 @@ class ARFIMA(BaseARIMAModel):
         self.p = p
         self.d = d
         self.q = q
-        self.d_weights = None            #last val of each diff level, need for inverting
 
     #Method to return num of AR and MA terms
     def param_num(self):
@@ -42,9 +41,7 @@ class ARFIMA(BaseARIMAModel):
     def convert(self, series):
         series = np.asarray(series, dtype=float)
         n = len(series)
-        curr = series
         w = self.frac_d_weights(self.d, n)
-        self.d_weights = w
 
         d_series = np.zeros(n)
         for t in range(n):

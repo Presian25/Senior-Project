@@ -29,7 +29,7 @@ def forecast_library(window):
     return value
 
 def get_rv(values, t):
-    return values[t + 1] ** 2
+    return values[t] ** 2
 
 validator = ModelValidator(
     name="GJR_GARCH_1_1",

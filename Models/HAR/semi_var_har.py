@@ -81,7 +81,7 @@ class SemiVarHAR(BaseHARModel):
             "beta_pos": self.params[1],
             "beta_neg": self.params[2],
         }
-        for label, coef in zip(self.window_labels, self.params[1:]):
+        for label, coef in zip(self.window_labels, self.params[3:]):
             row[f"beta_{label}"] = coef
 
         if log_path is not None:

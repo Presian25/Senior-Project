@@ -47,7 +47,7 @@ def forecast_library(window):
 
 
 def get_actual_return(values, t):
-    return values[t + 1]
+    return values[t]
 
 
 red_validator = ModelValidator(

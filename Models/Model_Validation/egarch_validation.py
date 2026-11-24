@@ -24,7 +24,7 @@ def forecast_library(window):
     return f.variance.values[-1, 0]
 
 def get_rv(values, t):
-    return values[t + 1] ** 2
+    return values[t] ** 2
 
 validator = ModelValidator(
     name="EGARCH_1_1",

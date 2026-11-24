@@ -28,11 +28,6 @@ class BaseGARCHModel(VolatilityModel):
     def param_bounds(self):
         raise NotImplementedError
 
-    #Method to produce a one-step-ahead variance forecast, shared across the family
-    @abstractmethod
-    def forecast(self):
-        raise NotImplementedError
-
     #Method to compute the negative Gaussian log-likelihood over a variance path
     def neg_log_likelihood(self, params, returns):
         variance = self.variance_recursion(params, returns)

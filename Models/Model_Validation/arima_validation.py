@@ -49,7 +49,7 @@ def forecast_library(window):
         return np.nan
 
 def get_actual_return(values, t):
-    return values[t + 1]
+    return values[t]
 
 validator = ModelValidator(
     name="ARIMA",

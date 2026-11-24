@@ -9,7 +9,6 @@ resulting state, then proceed forward and repeat.
 """
 
 from abc import ABC, abstractmethod
-import numpy as np
 
 
 class VolatilityModel(ABC):

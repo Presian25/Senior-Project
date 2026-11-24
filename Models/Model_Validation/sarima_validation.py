@@ -79,7 +79,7 @@ def make_forecast_library(s):
 
 
 def get_actual_return(values, t):
-    return values[t + 1]
+    return values[t]
 
 
 if __name__ == "__main__":
