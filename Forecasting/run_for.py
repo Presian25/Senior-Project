@@ -1,5 +1,5 @@
 """
-Walk-forward forecasting: for every asset, frequency and model, fit on the last WINDOW
+Walk-forward forecasting -  for every asset, frequency and model, fit on the last WINDOW
 observations, forecast the next period, move one step forward and repeat.
 Saves Data/Results/forecasts/<freq>/<asset>/<model>.csv with the columns date, sigma_hat_pct
 (forecast std of that period's log return, in percent).
@@ -53,15 +53,12 @@ def run(item, spec, path):
     rows = []
 
     for p in range(WINDOW, stop):
-        #the data the model is allowed to see (the HAR columns are already lagged by one row)
         if family == "har":
             window = frame.iloc[p - WINDOW + 1: p + 1]
         elif family == "garch":
             window = returns[p - WINDOW: p]
         else:
             window = abs_returns[p - WINDOW: p]
-
-        #re-estimate the parameters every refit_every steps, if the fit fails keep the old model
         fitted_now = False
         if model is None or (p - WINDOW) % refit_every == 0:
             try:
@@ -78,7 +75,6 @@ def run(item, spec, path):
                 if family == "har":
                     raw = model.forecast(window)
                 else:
-                    #between refits the parameters stay fixed, but the model has to see the new window
                     if not fitted_now and family == "garch":
                         model.series = window
                         model.fitted_values = model.variance_recursion(model.params, window)
