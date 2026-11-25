@@ -43,5 +43,4 @@ MODELS = [
     Model("HAR_CJ", "har", HAR_CJ, lambda c: dict(rv_col=c["rv_col"], bv_col="BV", windows=HAR_WINDOWS)),
     Model("SemiVarHAR", "har", SemiVarHAR, lambda c: dict(rv_col=c["rv_col"], rv_pos_col="RV_pos", rv_neg_col="RV_neg", windows=SV_WINDOWS)),
 ]
-#map MODELS - Model
-map = {m.name: m for m in MODELS}
+

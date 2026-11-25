@@ -5,9 +5,6 @@ Importantly, this implementation allows for both daily and hourly data input
 """
 
 import numpy as np
-import csv
-from pathlib import Path
-
 from Models.HAR.base_har_model import BaseHARModel
 
 
@@ -40,8 +37,6 @@ class LogHAR(BaseHARModel):
 
         rm = reg[valid]
         y = target[valid]
-
-        self._valid_index = df.index[valid]
         return rm, y
 
     #Method to produce a forecast
@@ -57,31 +52,3 @@ class LogHAR(BaseHARModel):
         smear = float(np.mean(np.exp(self.series - self.fitted_values)))
         return np.exp(log_forecast) * smear
 
-    #Method to collect fit data
-    def fit_validation(self, log_path=None, ticker=None):
-        self._check_is_fitted()
-
-        row = {
-            "model": "Log_HAR",
-            "ticker": ticker,
-            "rv_col": self.rv_col,
-            "windows": str(self.windows),
-            "fit_start": self.fit_start,
-            "fit_end": self.fit_end,
-            "const": self.params[0],
-        }
-        for label, coef in zip(self.window_labels, self.params[1:]):
-            row[f"beta_{label}"] = coef
-
-        if log_path is not None:
-            log_path = Path(log_path)
-            log_path.parent.mkdir(parents=True, exist_ok=True)
-            file_exists = log_path.exists()
-
-            with open(log_path, "a", newline="") as f:
-                writer = csv.DictWriter(f, fieldnames=row.keys())
-                if not file_exists:
-                    writer.writeheader()
-                writer.writerow(row)
-
-        return row

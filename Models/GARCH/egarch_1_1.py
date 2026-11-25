@@ -1,15 +1,13 @@
 """
 Model's formula:
-EGARCH(1,1): omega + beta*log(sigma_{t-1}^2)
-                 + alpha*(|eps_{t-1}|/sigma_{t-1} - sqrt(2/pi))
-                 + gamma*(eps_{t-1}/sigma_{t-1})
+EGARCH(1,1): o + b*log(sigma_{t-1}^2)
+                 + a*(|eps_{t-1}|/sigma_{t-1} - sqrt(2/pi))
+                 + g*(eps_{t-1}/sigma_{t-1})
 
 The model specializes at capturing volatility shocks
 """
 
 import numpy as np
-import csv
-from pathlib import Path
 
 from Models.GARCH.base_garch_model import BaseGARCHModel
 VAR_TH = 20.0
@@ -60,31 +58,4 @@ class EGARCH_1_1(BaseGARCHModel):
         forecast = np.clip(forecast, -VAR_TH, VAR_TH)
         return np.exp(forecast)
 
-    #Method to save fit data
-    def fit_validation(self, log_path=None, ticker=None):
-        self._check_is_fitted()
-        o, a, b, g= self.params
-
-        row = {
-            "model": "EGARCH_1_1",
-            "ticker": ticker,
-            "fit_start": self.fit_start,
-            "fit_end": self.fit_end,
-            "omega": o,
-            "alpha": a,
-            "beta": b,
-            "gamma": g,
-        }
-
-        if log_path is not None:
-            log_path = Path(log_path)
-            log_path.parent.mkdir(parents=True, exist_ok=True)
-            file_exists = log_path.exists()
-
-            with open(log_path, "a", newline="") as f:
-                writer = csv.DictWriter(f, fieldnames=row.keys())
-                if not file_exists:
-                    writer.writeheader()
-                writer.writerow(row)
-
-        return row
+    

@@ -54,8 +54,6 @@ class BaseGARCHModel(VolatilityModel):
         self.params = result.x
         self.series = returns
         self.fitted_values = self.variance_recursion(self.params, returns)
-        self.fit_start = 0
-        self.fit_end = len(returns) - 1
         self.is_fitted = True
         return result
 

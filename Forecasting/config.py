@@ -10,7 +10,6 @@ DERIVED_DIR = ROOT / "Data" / "Datasets" / "Derived_Datasets"
 RESULTS_DIR = ROOT / "Data" / "Results"
 FORECAST_DIR = RESULTS_DIR / "forecasts"
 TABLE_DIR = RESULTS_DIR / "tables"
-PILOT_DIR = RESULTS_DIR / "pilot"
 
 WINDOW = 1000             
 

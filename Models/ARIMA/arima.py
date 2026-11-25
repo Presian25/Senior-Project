@@ -52,38 +52,3 @@ class ARIMA(BaseARIMAModel):
         bounds += [(-0.999, 0.999)] * self.p
         bounds += [(-0.999, 0.999)] * self.q
         return bounds
-
-    def fit_validation(self, log_path=None, ticker=None):
-        self._check_is_fitted()
-        c = self.params[0]
-        phi = self.params[1:1+self.p]
-        theta = self.params[1+self.p:1+self.p+self.q]
-
-        row = {
-            "model": "ARIMA",
-            "ticker": ticker,
-            "p": self.p,
-            "d": self.d,
-            "q": self.q,
-            "fit_start": self.fit_start,
-            "fit_end": self.fit_end,
-            "const": c,
-        }
-        for i, coef in enumerate(phi, start=1):
-            row[f"phi_{i}"] = coef
-        for j, coef in enumerate(theta, start=1):
-            row[f"theta_{j}"] = coef
-
-        if log_path is not None:
-            import csv
-            from pathlib import Path
-            log_path = Path(log_path)
-            log_path.parent.mkdir(parents=True, exist_ok=True)
-            file_exists = log_path.exists()
-            with open(log_path, "a", newline="") as f:
-                writer = csv.DictWriter(f, fieldnames=row.keys())
-                if not file_exists:
-                    writer.writeheader()
-                writer.writerow(row)
-
-        return row

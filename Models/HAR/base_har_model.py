@@ -31,7 +31,5 @@ class BaseHARModel(VolatilityModel):
         self.params = weights
         self.series = y
         self.fitted_values = rm @ weights
-        self.fit_start = 0
-        self.fit_end = len(y) - 1
         self.is_fitted = True
         return weights

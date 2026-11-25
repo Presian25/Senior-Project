@@ -45,7 +45,7 @@ def hf_daily_target(hourly_path):
     return (np.sqrt(total.where(complete)) * 100.0).rename("rv_hf_pct")
 
 #Method to load targets for all assets, indexed like the feature files
-def load_targets(item, assets_index=None):
+def load_targets(item):
     df = load(item["path"])
     t = pd.DataFrame({"abs_ret_pct": df["log_return"].abs() * 100.0})
     if item["freq"] == "1d" and item["cls"] in HF_CLASSES:

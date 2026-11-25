@@ -87,8 +87,6 @@ class BaseARIMAModel(VolatilityModel):
         self.series = init_set
         self.converted_series = series
         self.fitted_values, self.residuals = self.recursion(self.params, series)
-        self.fit_start = 0
-        self.fit_end = len(init_set) -1
         self.is_fitted = True
         return result
 

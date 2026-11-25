@@ -1,6 +1,6 @@
 """
 Model's formula:
-GJR-GARCH(1,1): sigma_t^2 = omega + alpha*eps_{t-1}^2 + gamma*I_{t-1}*eps_{t-1}^2 + beta*sigma_{t-1}^2
+GJR-GARCH(1,1): sigma_t^2 = o + a*eps_{t-1}^2 +g*I_{t-1}*eps_{t-1}^2 + b*sigma_{t-1}^2
 where I_{t-1} = 1 if eps_{t-1} < 0, else 0.
 
 This model's benefit is to capture levergae effect as negative shocks increase future variance
@@ -8,8 +8,6 @@ more than positive shocks, even at the same scale
 """
 
 import numpy as np
-import csv
-from pathlib import Path
 
 from Models.GARCH.base_garch_model import BaseGARCHModel
 
@@ -58,32 +56,4 @@ class GJR_GARCH_1_1(BaseGARCHModel):
             ind = 0.0
         return o + a * prev_return**2 + g*ind*prev_return**2 +  b * prev_variance
 
-    #Method to save fit data
-    def fit_validation(self, log_path=None, ticker=None):
-        self._check_is_fitted()
-        o, a, b, g= self.params
-
-        row = {
-            "model": "GJR_GARCH_1_1",
-            "ticker": ticker,
-            "fit_start": self.fit_start,
-            "fit_end": self.fit_end,
-            "omega": o,
-            "alpha": a,
-            "beta": b,
-            "gamma": g,
-            "persistence": a + g/2 + b,
-        }
-
-        if log_path is not None:
-            log_path = Path(log_path)
-            log_path.parent.mkdir(parents=True, exist_ok=True)
-            file_exists = log_path.exists()
-
-            with open(log_path, "a", newline="") as f:
-                writer = csv.DictWriter(f, fieldnames=row.keys())
-                if not file_exists:
-                    writer.writeheader()
-                writer.writerow(row)
-
-        return row
+    
