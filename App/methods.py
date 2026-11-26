@@ -5,6 +5,7 @@ Contains the methods needed for the dashboard
 import numpy as np
 import pandas as pd
 
+
 from Forecasting.config import ABS_SCALE
 from Forecasting.evaluate import qlike_var, dm_stat
 from Blending.blend_reg import reg_labels

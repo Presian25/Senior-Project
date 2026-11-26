@@ -1,7 +1,5 @@
 """
-The parts shared by all the blends: paths, settings and helper methods.
-To add a new blend: make a file <name>_blend.py (opt_blend.py is the simplest example), and add the name of
-the blend to BLEND_NAMES and the file to run_all.py.
+The parts shared by all the blends. This includes paths, settings and helper methods.
 """
 
 import warnings

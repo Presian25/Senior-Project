@@ -1,6 +1,4 @@
 import warnings
-
-import numpy as np
 import pandas as pd
 
 from Blending.utilities import BLEND_DIR, BLEND_TABLE_DIR, BLEND_NAMES

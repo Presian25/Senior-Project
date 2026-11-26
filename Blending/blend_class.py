@@ -1,8 +1,12 @@
 """
 3rd blend: calcs weights like this:
 50%  its own QLIKE-optimal weights
-25%  the QLIKE-optimal weights of the other assets of its class
+25%  the QLIKE-optimal weights of the other assets of its group.
 25%  eq weights
+
+Important to note is that the groups are 2 - (equities, ETFs), (commodities, crypto, futures). Therefore,
+an ETF asset for example is influenced by all other ETFs and equities for example.
+
 This blend needs all assets at once, so it has its own loop.
 """
 
@@ -18,8 +22,8 @@ OWN_PCT, GROUP_PCT, EQ_PCT = 0.5, 0.25, 0.25
 EQ_LIKE = ["Equities", "ETFs"]
 
 
-#Method to find the optimal weights of a group of assets on the K periods before the given date
-def group_weights(names, data, date, k):
+#Method to find the optimal weights of a group of assets
+def group_ws(names, data, date, k):
     vars, act_sq = [], []
     for name in names:
         V, Y2, index = data[name]
@@ -53,8 +57,8 @@ def main():
 
         for asset, (V, _, index) in data.items():
             mates = [a for a in data if group[a] == group[asset] and a != asset]
-            own = [group_weights([asset], data, d, p) for d in dates]
-            others = [group_weights(mates, data, d, p) for d in dates]
+            own = [group_ws([asset], data, d, p) for d in dates]
+            others = [group_ws(mates, data, d, p) for d in dates]
 
             out = np.full(len(index), np.nan)
             a = dates.searchsorted(index, side="right") - 1        

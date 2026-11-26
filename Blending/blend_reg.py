@@ -1,5 +1,6 @@
 """
-2nbd blend: takes into account the particular volatility regime
+2nbd blend: takes into account the particular volatility regime. 
+Weights are 50% based on past regime performance of an x model, the other 50 is general recent performance
 """
 
 import numpy as np

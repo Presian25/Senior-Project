@@ -12,7 +12,7 @@ RECOMPUTE = {"1h": 24, "1d": 5}
 
 
 #Method for Qlike optimal weights
-def optimal_weights(set, y, naive, freq):
+def opt_ws(set, y, naive, freq):
     k = PERIODS[freq]
     vars = set.to_numpy() ** 2
     act_sq = np.maximum(y.to_numpy() ** 2, VAR_FLOOR)
@@ -28,7 +28,7 @@ def optimal_weights(set, y, naive, freq):
 
 
 def main():
-    run_per_asset("BLEND_OPT", optimal_weights)
+    run_per_asset("BLEND_OPT", opt_ws)
 
 
 if __name__ == "__main__":
