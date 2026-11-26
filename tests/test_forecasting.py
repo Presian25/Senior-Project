@@ -72,7 +72,7 @@ def test_run_dates(tmp_path, monkeypatch):
 
 
 #Test that if refir fails, model uses prev params
-def test_run_failed_refit_keeps_model(tmp_path, monkeypatch):
+def test_run_no_refit(tmp_path, monkeypatch):
     calls = []
     class Temp(GARCH_1_1):
         def fit(self, series):

@@ -11,7 +11,7 @@ import pandas as pd
 import plotly.graph_objects as go
 import streamlit as st
 
-from App import data_handling, methods
+from App import asset_info, data_handling, methods
 
 st.set_page_config(page_title="Volatility forecasting tool", layout="wide")
 
@@ -67,6 +67,10 @@ Every forecast is made at the start of a period using only earlier data, so you 
 what really happened with **Reveal what happened**. Forecast frequency means the length of the
 forecast period (one hour or one day).
 """)
+    with st.expander("Asset guide: what each asset is"):
+        guide = pd.DataFrame(asset_info.ASSETS, index=["Name", "Class", "Description"]).T
+        guide.index.name = "Ticker"
+        st.dataframe(guide.sort_values(["Class", "Name"]))
 
 
 #Method to draw the chosen models against the realized |return|
@@ -182,12 +186,13 @@ st.sidebar.header("Forecast filters")
 label = st.sidebar.radio("Forecast frequency (one step ahead)", ["Hourly", "Daily"])
 freq = "1h" if label == "Hourly" else "1d"
 try:
-    assets = sorted(data_handling.list_assets(freq))
+    assets = sorted(data_handling.list_assets(freq), key=asset_info.sort_key)
 except data_handling.LoadError as error:
     st.error(str(error))
     st.stop()
 
-asset = st.sidebar.selectbox("Asset", assets)
+asset = st.sidebar.selectbox("Asset", assets, format_func=asset_info.label)
+st.sidebar.caption(asset_info.describe(asset))
 try:
     forec, rr, naive = get_data(freq, asset)
 except data_handling.LoadError as error:
@@ -219,7 +224,7 @@ if st.sidebar.button("Apply", disabled=ts is None, type="primary"):
     st.session_state["query"] = current
 
 st.sidebar.divider()
-st.sidebar.multiselect("My assets (watchlist)", assets, key="watchlist")
+st.sidebar.multiselect("My assets (watchlist)", assets, format_func=asset_info.label, key="watchlist")
 
 explorer, watchlist = st.tabs(["Forecast explorer", "My assets"])
 
@@ -231,7 +236,7 @@ with explorer:
         if query != current:
             st.info("The filters were changed. Press Apply to update the results.")
         forec_q, rr_q, naive_q = get_data(query["freq"], query["asset"])
-        show_result(forec_q, rr_q, naive_q, query, query["asset"])
+        show_result(forec_q, rr_q, naive_q, query, asset_info.label(query["asset"]))
 
 with watchlist:
     chosen = st.session_state.get("watchlist", [])
@@ -244,9 +249,9 @@ with watchlist:
             try:
                 forec_a, rr_a, naive_a = get_data(freq, name)
             except data_handling.LoadError:
-                rows.append({"asset": name, "recommended": "no data"})
+                rows.append({"asset": asset_info.label(name), "recommended": "no data"})
                 continue
-            rows.append({"asset": name, **methods.summary(forec_a, rr_a, naive_a, freq, window)})
+            rows.append({"asset": asset_info.label(name), **methods.summary(forec_a, rr_a, naive_a, freq, window)})
         shown = pd.DataFrame(rows).set_index("asset")
         shown["recommended"] = shown["recommended"].map(bl_names)
         shown = shown.rename(columns={"recommended": "Recommended model", "recent QLIKE": "Recent QLIKE",
