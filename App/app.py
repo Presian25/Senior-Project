@@ -29,7 +29,7 @@ def bl_names(name):
     return BLEND_NAMES.get(name, name)
 
 
-#Method to rename the models and the columns of a table before it is shown
+#Method to rename the models and the columns of a table
 def set_table_headers(table):
     table = table.rename(index=BLEND_NAMES)
     if "model" in table.columns:
@@ -181,7 +181,7 @@ def show_result(forec, rr, naive, query, name):
             st.dataframe(set_table_headers(longrun).style.format({"QLIKE": "{:.3f}", "Correlation": "{:.3f}"}))
 
 
-#Sidebar: the forecast filters
+#Sidebar for the filters
 st.sidebar.header("Forecast filters")
 label = st.sidebar.radio("Forecast frequency (one step ahead)", ["Hourly", "Daily"])
 freq = "1h" if label == "Hourly" else "1d"

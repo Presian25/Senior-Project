@@ -39,7 +39,6 @@ def load_data(set):
         raise LoadError(f"Forecasts not found for {set['asset']} {set['freq']}")
     
     blnds = load_blnds(set)
-    blnds = blnds.reindex(forec.index)
     blnds = blnds.clip(lower=FLOOR_FRACTION*naive.median())
 
     return forec.join(blnds), act, naive
