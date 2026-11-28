@@ -8,6 +8,17 @@ frequency with 10 models (GARCH, ARIMA and HAR families) and 3 blends, using wal
 This is visualized using a Streamlit dashboard, which has further features, such as model recommendation.
 
 
+## Libraries
+The libraris used in the project are listed below:
+
+numpy, pandas - data handling and model computations
+scipy - numerical optimization
+yfinance, requests - downloading the raw data
+streamlit, plotly - dashboard
+pytest - tests
+arch, statsmodels - model validation
+
+
 ## Run
 Python 3.13 (developed with 3.13.4).
 ```
