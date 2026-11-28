@@ -1,0 +1,17 @@
+# Python
+__pycache__/
+*.pyc
+.pytest_cache/
+# Editors and environments
+.vscode/
+.idea/
+venv/
+.venv/
+# Logs aand temp files
+*.log
+repo_info.txt
+collect_info.ps1
+
+# Unnecessary tables. They are further research into the forecast behaviour,
+#also used for the thesis graphs, but there is no need for it to be in the repository.
+Data/Results/tables/
